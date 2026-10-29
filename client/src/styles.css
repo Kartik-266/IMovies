@@ -60,6 +60,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible, .form-control:focus-v
   .movie-card:hover, .movie-card:focus-visible { transform: none; }
 }
 /* outline buttons: Bootstrap's defaults fail 4.5:1 on the dark background */
+.btn-outline-primary { --bs-btn-color: #8ab4ff; --bs-btn-border-color: #4378ff; --bs-btn-hover-bg: #2a3555; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #8ab4ff; --bs-btn-active-bg: #2a3555; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #8ab4ff; }
 .btn-outline-secondary { --bs-btn-color: #c3cadb; --bs-btn-border-color: #7f8aa6; --bs-btn-hover-bg: #2a3555; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #aab3c8; --bs-btn-active-bg: #2a3555; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #aab3c8; }
 .btn-outline-danger { --bs-btn-color: #ff9a9e; --bs-btn-border-color: #e5484d; --bs-btn-hover-bg: #b3262b; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #b3262b; --bs-btn-active-bg: #b3262b; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #b3262b; }
 /* absolutely-positioned .visually-hidden cells inside a scrolling table must be clipped by it, not widen the page */

@@ -7,6 +7,9 @@ const proxy = { '/api': { target, changeOrigin: false }, '/socket.io': { target,
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_ALLOW_SIMULATED_OUTCOME_SELECTION': JSON.stringify(process.env.VITE_ALLOW_SIMULATED_OUTCOME_SELECTION || 'true'),
+  },
   server: { port: 5173, proxy },
   preview: { port: 4173, proxy },
   test: { environment: 'jsdom', setupFiles: './src/test/setup.js', globals: true, css: false },

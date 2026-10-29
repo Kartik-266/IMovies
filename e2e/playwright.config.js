@@ -1,7 +1,11 @@
 // @ts-check
 const { defineConfig } = require('@playwright/test');
 
-const exe = process.env.E2E_CHROMIUM_PATH; // optional: use an existing Chromium instead of `npx playwright install chromium`
+const fs = require('fs');
+const defaultWindowsChrome = process.platform === 'win32' && fs.existsSync('C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe')
+  ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+  : undefined;
+const exe = process.env.E2E_CHROMIUM_PATH || defaultWindowsChrome; // optional: use an existing Chromium instead of `npx playwright install chromium`
 const extraLd = process.env.E2E_LD_LIBRARY_PATH;
 
 module.exports = defineConfig({

@@ -67,7 +67,7 @@ export default function AdminShows() {
           {editingId && <p className="small text-secondary">Changes to movie, theater, screen or start time are blocked when booking history exists. Price changes apply only to currently available seats; held and booked seat prices are preserved.</p>}
           <FormAlert msg={msg} />
           <div className="row g-2">
-            <div className="col-md-4"><Field id="sh-m" label="Movie (release date enforced)"><select id="sh-m" className="form-select" required value={form.movie} onChange={(e) => set('movie', e.target.value)}><option value="">Select…</option>{(movies.data || []).map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}</select></Field></div>
+            <div className="col-md-4"><Field id="sh-m" label="Movie (released only)"><select id="sh-m" className="form-select" required value={form.movie} onChange={(e) => set('movie', e.target.value)}><option value="">Select…</option>{(movies.data || []).map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}</select></Field></div>
             <div className="col-md-4"><Field id="sh-t" label="Theater"><select id="sh-t" className="form-select" required value={form.theater} onChange={(e) => set('theater', e.target.value)}><option value="">Select…</option>{(theaters.data || []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></Field></div>
             <div className="col-md-4"><Field id="sh-s" label="Screen"><select id="sh-s" className="form-select" required value={form.screenName} onChange={(e) => set('screenName', e.target.value)} disabled={!form.theater}><option value="">Select…</option>{screens.map((s) => <option key={s.name} value={s.name}>{s.name}</option>)}</select></Field></div>
             <div className="col-md-4"><Field id="sh-d" label="Start (your local time)"><input id="sh-d" type="datetime-local" className="form-control" required value={form.startsAt} onChange={(e) => set('startsAt', e.target.value)} /></Field></div>
@@ -84,7 +84,7 @@ export default function AdminShows() {
         <div className="table-responsive"><table className="table table-sm align-middle"><thead><tr><th>Movie</th><th>Theater / screen</th><th>Starts</th><th>Seats left</th><th>Actions</th></tr></thead>
           <tbody>{shows.data.map((s) => (
             <tr key={s.id}><td>{s.movie.title}</td><td>{s.theater.name} · {s.screenName}</td><td>{fmtDateTime(s.startsAt)}</td><td>{s.availableSeats}</td>
-              <td className="text-end text-nowrap"><button className="btn btn-outline-primary btn-sm me-2" onClick={() => openEdit(s)}>Edit</button><button className="btn btn-outline-danger btn-sm" onClick={() => remove(s)}>Delete</button></td></tr>
+              <td className="text-end text-nowrap"><button className="btn btn-outline-light btn-sm me-2" onClick={() => openEdit(s)}>Edit</button><button className="btn btn-outline-danger btn-sm" onClick={() => remove(s)}>Delete</button></td></tr>
           ))}</tbody></table></div>
       )}
       <p className="small text-secondary">Shows with any booking history cannot be physically deleted. Only the next 100 upcoming shows are listed.</p>

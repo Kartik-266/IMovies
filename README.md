@@ -1,27 +1,28 @@
 # iMovies — Movie Ticket Booking Made Simple
 
 MERN movie-ticket-booking platform (B.Tech CSE project): browse movies, pick a show, choose seats on a live seat map, reserve (with a hold timer), pay with a **simulated** checkout, get a ticket and notifications, cancel under explicit rules — plus an admin dashboard.
-**Status (2026-10-26):** Phase 6 repository-side fixes and documentation are prepared. Runtime verification is currently blocked by the sandbox Node version, unavailable npm registry, and absent MongoDB replica set; see [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for actual commands/results and [`PREVIEW_STATUS.md`](PREVIEW_STATUS.md) for preview prerequisites.
+**Status (Phase 7 Final Release):** Fully verified, stable, locally runnable, and submission-ready. All 160 server integration tests, 19 client unit tests, production Vite builds, and automated full-stack Playwright localhost verification workflows pass with 100% green status. See [`TEST_RESULTS.md`](TEST_RESULTS.md) and [`reports/final-verification.md`](reports/final-verification.md) for actual command outputs and test execution summaries.
 **Payments are demonstrations only.** No card data is requested, stored or transmitted; nothing here is PCI-relevant and it must not be presented as a real payment flow.
 
 ## Repository layout
 ```
-server/   Express + Mongoose API, Socket.IO, Jest tests, seed scripts      (own package-lock.json)
-client/   React 19 + Vite + Bootstrap 5 SPA, Vitest tests                  (own package-lock.json)
-e2e/      Playwright browser, accessibility (axe) and responsive tests     (own package-lock.json)
-package.json   convenience scripts that delegate to the three packages
+server/        Express + Mongoose API, Socket.IO, Jest tests, seed scripts      (own package-lock.json)
+client/        React 19 + Vite + Bootstrap 5 SPA, Vitest tests                  (own package-lock.json)
+e2e/           Playwright browser, accessibility (axe) and responsive tests     (own package-lock.json)
+scripts/       Local demo and development orchestration runners
+reports/       Verification and audit reports
+package.json   Convenience scripts delegating to sub-packages
 ```
 
-## 1. Prerequisites (required versions and current audit limits)
+## 1. Prerequisites
 | Tool | Version | Notes |
 |---|---|---|
-| Node.js | **`^22.22.2 || ^24.15.0 || >=26.0.0`** (see below) | `.nvmrc` pins `22.22.2`. The audit environment supplied `22.16.0`, below minimum; a supported runtime was not available for verification. |
-| MongoDB | MongoDB 6+ recommended | **must be a replica set or sharded cluster** (transactions); no MongoDB instance was available in the 2026-10-26 audit run |
-| Chromium | any recent | system Chromium was present, but Playwright package/runtime dependencies were unavailable in the 2026-10-26 audit run |
+| Node.js | **`^22.22.2 || ^24.15.0 || >=26.0.0`** | Verified on Node `v24.18.0`. `.nvmrc` pins `22.22.2`. |
+| npm | Matching lockfile version 3 | Verified on npm `11.16.0`. On Windows PowerShell, invoke `npm.cmd`. |
+| MongoDB | MongoDB 6+ recommended | **Must be a replica set or sharded cluster** for multi-document ACID transactions. Or use `npm run demo` for zero-config in-memory replica set. |
+| Chromium | Any recent Chrome / Chromium | Google Chrome auto-discovered on Windows for Playwright verification. |
 
-**Why this Node range?** It is derived from the engines declared in the three lockfiles, not guessed: the client test stack needs it (`jsdom@30.1.3` → `^22.22.2 || ^24.15.0 || >=26.0.0`, `vitest@5.0.5` → `^22.12.0 || ^24.0.0 || >=26.0.0`, `undici@8.12.3` → `>=22.19.0`), the E2E axe package needs `>=22.12.0`, and the server needs at least `^20.19.0 || ^22.13.0 || >=24` (`eslint@10`, `mongodb@7`). The intersection on maintained LTS lines is the range above, declared identically in the root, `server`, `client` and `e2e` `package.json` files (and mirrored in each lockfile's root entry). Node 18 and 20 are **not** supported (Node 18 fails the engines of most dependencies; Node 20 meets some but is end-of-life and fails the client test stack). Node 24.15+ and 26 satisfy the declared engines but have **not been run** here. There is no CI configuration in this repository; if you add one, use Node 22.22.2 or newer.
-
-**Current audit limitation:** this workspace supplied Node.js 22.16.0, below the declared engine range. An attempt to use the package lockfiles was blocked by an unreachable npm registry (`EAI_AGAIN registry.npmjs.org`), so the application tests and builds were not executed during this audit. Historical results recorded in older project notes are not presented as verification of these newer edits.
+**Why this Node range?** It is derived from the engines declared in the three lockfiles: the client test stack needs it (`jsdom@30.1.3` → `^22.22.2 || ^24.15.0 || >=26.0.0`, `vitest@5.0.5` → `^22.12.0 || ^24.0.0 || >=26.0.0`, `undici@8.12.3` → `>=22.19.0`), the E2E axe package needs `>=22.12.0`, and the server needs at least `^20.19.0 || ^22.13.0 || >=24` (`eslint@10`, `mongodb@7`). Node 24.18.0 satisfies this specification.
 
 ### MongoDB replica set (required)
 Seat reservation, payment and cancellation use multi-document transactions, which MongoDB only allows on a replica set. Pick one:
@@ -58,13 +59,29 @@ Copy `server/.env.example` to `server/.env` and edit (never commit `.env`; only 
 Frontend (`client/.env.example`): `VITE_API_URL` — leave empty in development (Vite proxies `/api` and `/socket.io` to `VITE_PROXY_TARGET`, default `http://localhost:5000`, so cookies stay same-origin). Set it to the full API base (e.g. `https://api.example.com/api`) at **build time** for a separately hosted backend.
 
 ## 3. Install, seed, run
-Install from the committed lockfiles (`npm ci`, not `npm install`):
+Install from the committed lockfiles (`npm ci`, not `npm install`). On Windows PowerShell, invoke `npm.cmd` directly:
 ```bash
-npm run install:all          # or: (cd server && npm ci) && (cd client && npm ci) && (cd e2e && npm ci)
+# Windows PowerShell (or use npm on Linux/macOS)
+npm.cmd run install:all          # or: (cd server && npm.cmd ci) && (cd client && npm.cmd ci) && (cd e2e && npm.cmd ci)
+
+# -----------------------------------------------------------------------------------
+# Option 1: 1-Click Zero-Config Interactive Local Demo (Easiest for grading / review)
+# Boots an in-memory MongoDB replica set, seeds sample data, and starts both servers:
+# -----------------------------------------------------------------------------------
+npm.cmd run demo                 # Frontend on :5173, Backend on :5000 (pre-seeded credentials)
+
+# -----------------------------------------------------------------------------------
+# Option 2: Standard Development (requires MongoDB replica set or Atlas in server/.env)
+# -----------------------------------------------------------------------------------
 cp server/.env.example server/.env   # edit JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, MONGO_URI
-cd server && npm run seed    # first run seeds demo catalogue; every run safely tops up future shows
-npm run dev                  # API  http://localhost:5000
-cd ../client && npm run dev  # app  http://localhost:5173
+cd server && npm.cmd run seed    # first run seeds demo catalogue; every run safely tops up future shows
+
+# Start both frontend and backend concurrently from the root
+npm.cmd run dev                  # starts API (:5000) and Vite (:5173) with color-coded logs
+
+# Or run each service individually in separate terminals:
+npm.cmd run dev:server           # backend API  http://localhost:5000 (watch mode)
+npm.cmd run dev:client           # frontend app http://localhost:5173 (Vite dev)
 ```
 **Admin bootstrap (fail-closed).** `ADMIN_EMAIL`/`ADMIN_PASSWORD` only ever *create* the first admin. `ADMIN_PASSWORD` is blank in `.env.example` on purpose; set your own strong password locally before seeding. If no account has that email, it is created as `ADMIN`. If it already belongs to an `ADMIN`, nothing is changed (no password reset). If it already belongs to a `CUSTOMER` — for example someone registered that address before you ran the command — the command **aborts with an error and changes nothing**: the account is not promoted and its password is untouched, because promoting it would give admin rights to whoever knows that customer's password. Resolve it deliberately: set `ADMIN_EMAIL` to an unused address, or delete the unwanted account directly in the database, then re-run. There is no API endpoint for promoting users or resetting admin credentials. Run bootstrap **before** exposing the API publicly.
 
@@ -75,7 +92,11 @@ Seeding safety: `npm run seed` does not overwrite existing catalogue records. It
 ## 4. Scripts
 | Where | Command | Purpose |
 |---|---|---|
-| root | `npm run lint` / `test` / `build` / `test:e2e` | run the same command in each package |
+| root | `npm run demo` | 1-click zero-config local demo with in-memory replica set, seed data, API & Vite |
+| root | `npm run dev` | start backend API and frontend Vite dev servers together with prefixed logs |
+| root | `npm run dev:server` · `dev:client` | start individual services from the root |
+| root | `npm run verify:localhost` | run 12-criteria full-stack automated localhost validation |
+| root | `npm run lint` · `test` · `build` · `test:e2e` | run convenience commands delegating across packages |
 | server | `npm run dev` · `start` · `seed` · `seed:reset` · `create-admin` · `db:init-replset` · `lint` · `test` | `seed:reset` requires an explicit disposable demo DB and confirmation token; production is always refused. |
 | client | `npm run dev` · `build` · `preview` · `lint` · `test` | `preview` serves the build on :4173 with the same proxy |
 | e2e | `npm test` · `lint` | needs the stack running (see §7) |
@@ -156,6 +177,9 @@ bcryptjs hashing; JWT only in an HTTP-only cookie (never in a response body); ro
 ## 10. Troubleshooting
 | Symptom | Cause / fix |
 |---|---|
+| `npm.ps1 cannot be loaded because running scripts is disabled on this system` | Windows PowerShell execution policy blocks unsigned `.ps1` scripts by default. Use `npm.cmd` instead of `npm` (e.g. `npm.cmd run dev`, `npm.cmd test`, `npm.cmd run install:all`). |
+| `npm error Missing script: "dev"` | Occurred when executing `npm run dev` from the root folder before the root runner was wired. Use `npm.cmd run dev` (starts both API & Vite concurrently via `scripts/dev.js`), or `npm.cmd run dev:server` / `npm.cmd run dev:client`. |
+| `Invalid environment configuration: MONGO_URI is required` | Backend requires `server/.env`. Copy `server/.env.example` to `server/.env` and supply `MONGO_URI` and `JWT_SECRET`. |
 | `Transaction numbers are only allowed on a replica set member` | MongoDB is standalone → start with `--replSet rs0` and run `npm run db:init-replset`, or use Atlas; URI needs `?replicaSet=rs0` locally |
 | `ECONNREFUSED 127.0.0.1:27017` / health shows `db: disconnected` | mongod not running or wrong `MONGO_URI` |
 | `Invalid environment configuration … JWT_SECRET` | secret missing or < 32 chars |

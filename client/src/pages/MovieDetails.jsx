@@ -69,9 +69,9 @@ export default function MovieDetails() {
                 <div className="d-flex flex-wrap gap-2">
                   {list.map((s) => (
                     <Link key={s.id} to={`/shows/${s.id}/seats`} className={`btn btn-outline-light show-btn ${s.availableSeats === 0 ? 'disabled' : ''}`}
-                      aria-disabled={s.availableSeats === 0} aria-label={`${fmtTime(s.startsAt)}, ${s.screenName}, ${s.availableSeats} seats left`}>
+                      aria-disabled={s.availableSeats === 0}>
                       <strong>{fmtTime(s.startsAt)}</strong>
-                      <small className="d-block text-secondary">{s.screenName} · {s.availableSeats === 0 ? 'Sold out' : `${s.availableSeats} left`}</small>
+                      <small className="d-block text-secondary">{s.screenName} · {s.availableSeats === 0 ? 'Sold out' : `${s.availableSeats} seats left`}</small>
                     </Link>
                   ))}
                 </div>
